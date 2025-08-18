@@ -1,0 +1,40 @@
+# EventGREEN Bot - Telegram бот для управления личными базами клиентов
+# Основные зависимости для работы с Telegram Bot API и Google Sheets
+
+# Telegram Bot API
+python-telegram-bot==21.5
+
+# Google APIs
+google-api-python-client==2.149.0
+google-auth-httplib2==0.2.0
+google-auth-oauthlib==1.2.1
+google-generativeai==0.8.3
+
+# VCF парсинг
+vobject==0.9.8
+
+# HTTP клиент
+httpx==0.27.2
+
+# Логирование
+loguru==0.7.2
+
+# Работа с датами
+python-dateutil==2.9.0.post0
+pytz==2024.1
+
+# Асинхронность
+aiofiles==24.1.0
+
+# Работа с переменными окружения
+python-dotenv==1.0.1
+
+# JSON валидация
+jsonschema==4.23.0
+
+# Планировщик задач
+schedule==1.2.2
+
+# Cloudflare Workers совместимость
+fastapi==0.115.0
+uvicorn==0.31.0

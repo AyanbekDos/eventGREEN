@@ -1,0 +1,42 @@
+# Cloudflare Workers конфигурация для EventGREEN Bot
+name = "eventgreen-bot"
+main = "src/worker.js"
+compatibility_date = "2023-10-30"
+
+# Включаем Node.js совместимость для работы с библиотеками
+compatibility_flags = ["nodejs_compat"]
+
+# Переменные окружения (публичные)
+[vars]
+ENVIRONMENT = "production"
+TIMEZONE = "Asia/Almaty"
+LOG_LEVEL = "INFO"
+
+# Cron триггеры для индивидуальных уведомлений
+# Проверяем каждую минуту кому нужно отправить уведомления
+[[triggers.crons]]
+cron = "* * * * *"  # Каждую минуту
+
+# Дополнительный триггер для ежедневной рассылки (опционально)
+[[triggers.crons]]
+cron = "0 9 * * *"  # 09:00 UTC = 15:00 Almaty
+
+# Маршрутизация (настраивается после создания worker)
+# [[routes]]
+# pattern = "eventgreen.yourdomain.com/*"
+# zone_name = "yourdomain.com"
+
+# KV хранилище для кэширования (опционально)
+# [[kv_namespaces]]
+# binding = "CACHE"
+# id = "your-kv-namespace-id"
+# preview_id = "your-preview-kv-id"
+
+# Настройки ресурсов
+[placement]
+mode = "smart"  # Автоматическое размещение для лучшей производительности
+
+# Лимиты выполнения
+[limits]
+cpu_ms = 30000  # 30 секунд CPU time
+memory_mb = 128  # 128 МБ памяти

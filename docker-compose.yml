@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  eventgreen-bot:
+    build: .
+    container_name: eventgreen-bot-v4
+    restart: unless-stopped
+    
+    environment:
+      # Переменные из .env файла
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - ADMIN_TELEGRAM_ID=${ADMIN_TELEGRAM_ID}
+      
+    volumes:
+      # Монтируем логи для персистентности
+      - ./logs:/app/logs
+      # Монтируем конфиденциальные файлы
+      - ./credentials.json:/app/credentials.json:ro
+      - ./service.json:/app/service.json:ro
+    
+    # Ограничения ресурсов
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.5'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    
+    # Логирование
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+    
+    # Healthcheck
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('https://api.telegram.org', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
