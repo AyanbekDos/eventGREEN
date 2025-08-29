@@ -38,3 +38,7 @@ schedule==1.2.2
 # Cloudflare Workers совместимость
 fastapi==0.115.0
 uvicorn==0.31.0
+
+# Тестирование
+pytest==8.3.3
+pytest-asyncio==0.24.0
