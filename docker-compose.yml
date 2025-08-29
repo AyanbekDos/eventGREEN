@@ -19,15 +19,15 @@ services:
       - ./credentials.json:/app/credentials.json:ro
       - ./service.json:/app/service.json:ro
     
-    # Ограничения ресурсов
+    # Ограничения ресурсов для 1 CPU droplet
     deploy:
       resources:
         limits:
           memory: 1G
-          cpus: '1.5'
+          cpus: '0.8'
         reservations:
-          memory: 512M
-          cpus: '0.5'
+          memory: 256M
+          cpus: '0.2'
     
     # Логирование
     logging:
