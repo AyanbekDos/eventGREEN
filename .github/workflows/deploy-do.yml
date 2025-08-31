@@ -39,26 +39,48 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Debug SSH Configuration
+      run: |
+        echo "🔍 Debugging SSH setup..."
+        echo "Host: ${{ secrets.DO_HOST != '' && 'SET' || 'NOT SET' }}"
+        echo "User: ${{ secrets.DO_USER != '' && 'SET' || 'NOT SET' }}"  
+        echo "SSH Key: ${{ secrets.DO_SSH_KEY != '' && 'SET' || 'NOT SET' }}"
+        echo "Project Path: ${{ secrets.PROJECT_PATH != '' && 'SET' || 'NOT SET' }}"
+
     - name: Deploy to DigitalOcean server
-      uses: appleboy/ssh-action@master
+      uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.DO_HOST }}
         username: ${{ secrets.DO_USER }}
         key: ${{ secrets.DO_SSH_KEY }}
+        port: 22
+        timeout: 300s
+        command_timeout: 60m
         script: |
           set -e
-          cd ${{ secrets.PROJECT_PATH }}
+          
+          echo "🌟 Starting EventGREEN deployment..."
+          echo "📅 Date: $(date)"
+          echo "👤 User: $(whoami)"
+          echo "📂 Current dir: $(pwd)"
+          
+          cd ${{ secrets.PROJECT_PATH }} || {
+            echo "❌ Failed to change to project directory"
+            exit 1
+          }
           
           echo "🔄 Pulling latest code from GitHub..."
-          git pull origin main
+          git pull origin main || {
+            echo "⚠️ Git pull failed, continuing anyway..."
+          }
           
           echo "📝 Creating secret files..."
           echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
-          echo "${{ secrets.CREDENTIALS_JSON_CONTENT }}" > credentials.json
+          echo "${{ secrets.CREDENTIALS_JSON_CONTENT }}" > credentials.json  
           echo "${{ secrets.SERVICE_JSON_CONTENT }}" > service.json
           
           echo "🐳 Starting deployment via Docker Compose..."
-          docker-compose down
+          docker-compose down || echo "⚠️ Docker compose down failed, continuing..."
           docker-compose build --no-cache
           docker-compose up -d
           
@@ -68,3 +90,13 @@ jobs:
           
           echo "📋 Recent logs:"
           docker-compose logs --tail=10
+
+    - name: Deployment Status
+      if: always()
+      run: |
+        if [ ${{ job.status }} == 'success' ]; then
+          echo "🎉 Deployment SUCCESS!"
+        else
+          echo "❌ Deployment FAILED!"
+          echo "📋 Check the logs above for details"
+        fi
