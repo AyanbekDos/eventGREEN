@@ -1227,18 +1227,20 @@ class EventGREENBot:
                     # Получаем события на сегодня для пользователя
                     today_events = self.sheets_manager.get_today_events(user)
                     
+                    # Формируем сообщение с датой (всегда отправляем уведомление)
+                    from datetime import datetime
+                    today_date = datetime.now()
+                    weekdays = ['понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота', 'воскресенье']
+                    weekday = weekdays[today_date.weekday()]
+                    date_str = today_date.strftime('%d.%m.%Y')
+                    
+                    message = "🌅 <b>Доброе утро!</b>\n\n"
+                    
                     if today_events:
+                        # Есть события на сегодня
                         # Загружаем поздравления для утренних уведомлений
                         congratulations_map = self.sheets_manager.get_congratulations_map()
                         
-                        # Формируем сообщение с датой
-                        from datetime import datetime
-                        today_date = datetime.now()
-                        weekdays = ['понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота', 'воскресенье']
-                        weekday = weekdays[today_date.weekday()]
-                        date_str = today_date.strftime('%d.%m.%Y')
-                        
-                        message = "🌅 <b>Доброе утро!</b>\n\n"
                         message += f"🎉 <b>События на сегодня, {weekday}, {date_str}:</b>\n\n"
                         message += "💡 <i>Кликайте на выделенные телефоны и поздравления для быстрого копирования</i>\n\n"
                         
@@ -1257,20 +1259,28 @@ class EventGREENBot:
                             congratulation = congratulations_map.get(event_type_lower, congratulations_map.get("неизвестно", "🎉 Поздравляем с праздником!"))
                             message += f"<blockquote>{congratulation}</blockquote>\n"
                         
-                        # Убираем ограничение
-                        
                         message += f"\n<b>Всего: {len(today_events)} событий</b>\n\n"
                         message += "📊 Хорошего дня и успешных продаж! 💪"
-                        
-                        # Отправляем уведомление
-                        await self.application.bot.send_message(
-                            chat_id=int(user.telegram_id),
-                            text=message,
-                            parse_mode=ParseMode.HTML,
-                            disable_web_page_preview=True
-                        )
-                        
-                        print(f"✅ Уведомление отправлено пользователю {user.telegram_id}")
+                    else:
+                        # Нет событий на сегодня
+                        message += f"📅 <b>Сегодня, {weekday}, {date_str}</b>\n\n"
+                        message += "😌 <b>Сегодня праздников нет</b>\n\n"
+                        message += "🔍 Отличный день для поиска новых клиентов!\n"
+                        message += "💼 Можете заняться другими важными делами или проанализировать предстоящие события.\n\n"
+                        message += "📊 Хорошего дня и продуктивной работы! 💪"
+                    
+                    # Отправляем уведомление (всегда)
+                    await self.application.bot.send_message(
+                        chat_id=int(user.telegram_id),
+                        text=message,
+                        parse_mode=ParseMode.HTML,
+                        disable_web_page_preview=True
+                    )
+                    
+                    if today_events:
+                        print(f"✅ Уведомление с {len(today_events)} событиями отправлено пользователю {user.telegram_id}")
+                    else:
+                        print(f"✅ Уведомление без событий отправлено пользователю {user.telegram_id}")
                     
                 except Exception as e:
                     print(f"❌ Ошибка отправки уведомления пользователю {user.telegram_id}: {e}")
