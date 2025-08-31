@@ -74,10 +74,8 @@ jobs:
             echo "⚠️ Git pull failed, continuing anyway..."
           }
           
-          echo "📝 Creating secret files..."
-          echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
-          echo "${{ secrets.CREDENTIALS_JSON_CONTENT }}" > credentials.json  
-          echo "${{ secrets.SERVICE_JSON_CONTENT }}" > service.json
+          echo "📝 Checking secret files exist..."
+          ls -la .env service.json credentials.json || echo "⚠️ Some config files missing"
           
           echo "🐳 Starting deployment via Docker Compose..."
           docker-compose down || echo "⚠️ Docker compose down failed, continuing..."
