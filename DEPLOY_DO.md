@@ -96,7 +96,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 
 # ВАЖНО: Перелогиниваемся для применения группы docker
 exit
-ssh ubuntu@YOUR_DROPLET_IP
+ssh ubuntu@167.172.188.168
 ```
 
 ### ЭТАП 3: Деплой проекта
@@ -150,7 +150,7 @@ scp service.json ubuntu@YOUR_DROPLET_IP:~/eventGREEN_v4/
 DO_HOST = IP_адрес_вашего_дроплета
 DO_USER = ubuntu
 DO_SSH_KEY = содержимое_файла_~/.ssh/id_rsa (приватный ключ!)
-PROJECT_PATH = /home/ubuntu/eventGREEN_v4
+PROJECT_PATH = /home/ubuntu/eventGREEN
 ENV_FILE_CONTENT = содержимое_вашего_.env_файла
 CREDENTIALS_JSON_CONTENT = содержимое_credentials.json
 SERVICE_JSON_CONTENT = содержимое_service.json
