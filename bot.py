@@ -1040,16 +1040,60 @@ class EventGREENBot:
                                 print(f"❌ Не удалось получить события для {user.username}")
                                 today_events = []  # Пустой список если не удалось
                     
+                    # Формируем сообщение с датой (всегда отправляем уведомление)
+                    from datetime import datetime
+                    today_date = datetime.now()
+                    weekdays = ['понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота', 'воскресенье']
+                    weekday = weekdays[today_date.weekday()]
+                    date_str = today_date.strftime('%d.%m.%Y')
+                    
+                    message = "🌅 <b>Доброе утро!</b>\n\n"
+                    
                     if today_events:
-                        message = await self._format_daily_notification_async(today_events)
-                        await self.application.bot.send_message(
-                            chat_id=user.telegram_id,
-                            text=message,
-                            parse_mode=ParseMode.HTML
-                        )
-                        print(f"✅ Уведомление отправлено пользователю {user.username} ({len(today_events)} событий)")
+                        # Есть события на сегодня
+                        # Загружаем поздравления для утренних уведомлений
+                        congratulations_map = self.sheets_manager.get_congratulations_map()
+                        
+                        message += f"🎉 <b>События на сегодня, {weekday}, {date_str}:</b>\n\n"
+                        message += "💡 <i>Кликайте на выделенные телефоны и поздравления для быстрого копирования</i>\n\n"
+                        
+                        for i, event in enumerate(today_events, 1):  # Показываем ВСЕ события
+                            # Структурированный формат с полями
+                            name = event.name if event.name and event.name.strip() else "NULL"
+                            phone = event.phone if event.phone and event.phone.strip() else "NULL"
+                            event_type = event.event_type if event.event_type and event.event_type.strip() and event.event_type.lower() != "неизвестно" else "NULL"
+                            note = event.note if event.note and event.note.strip() else "NULL"
+                            
+                            # Формируем строку с явными полями
+                            message += f"{i}. 👤 <b>{name}</b> 📞 <code>📋 {phone}</code> 🎉 {event_type} 📝 {note}\n"
+                            
+                            # Поздравление
+                            event_type_lower = event.event_type.lower() if event.event_type and event.event_type.strip() else "неизвестно"
+                            congratulation = congratulations_map.get(event_type_lower, congratulations_map.get("неизвестно", "🎉 Поздравляем с праздником!"))
+                            message += f"<blockquote>{congratulation}</blockquote>\n"
+                        
+                        message += f"\n<b>Всего: {len(today_events)} событий</b>\n\n"
+                        message += "📊 Хорошего дня и успешных продаж! 💪"
                     else:
-                        print(f"ℹ️ У пользователя {user.username} нет событий на сегодня")
+                        # Нет событий на сегодня
+                        message += f"📅 <b>Сегодня, {weekday}, {date_str}</b>\n\n"
+                        message += "😌 <b>Сегодня праздников нет</b>\n\n"
+                        message += "🔍 Отличный день для поиска новых клиентов!\n"
+                        message += "💼 Можете заняться другими важными делами или проанализировать предстоящие события.\n\n"
+                        message += "📊 Хорошего дня и продуктивной работы! 💪"
+                    
+                    # Отправляем уведомление (всегда)
+                    await self.application.bot.send_message(
+                        chat_id=user.telegram_id,
+                        text=message,
+                        parse_mode=ParseMode.HTML,
+                        disable_web_page_preview=True
+                    )
+                    
+                    if today_events:
+                        print(f"✅ Уведомление с {len(today_events)} событиями отправлено пользователю {user.username}")
+                    else:
+                        print(f"✅ Уведомление без событий отправлено пользователю {user.username}")
                         
                 except Exception as e:
                     print(f"❌ Ошибка отправки уведомления пользователю {user.telegram_id}: {e}")
